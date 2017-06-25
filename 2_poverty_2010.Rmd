@@ -1,0 +1,113 @@
+---
+title: "2010 US Poverity Rates by County"
+author: "Stephanie Denis"
+date: "6/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, comment="")
+```
+
+* * * 
+
+# Load Libraries
+```{r load-libraries}
+# Load packages
+library(xlsx); library(ggplot2); library(reshape); library(reshape2); 
+library(tidyr); library(plyr); library(dplyr); library("readxl")
+```
+
+* * * 
+
+# Load Data
+```{r load-data}
+# Set working directory
+setwd("~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties")
+
+# Load poverty data from Census
+data <- read_excel("est10ALL.xls", sheet = "est10ALL")
+
+# Load state names
+states <- read.xlsx("states.xlsx", sheetIndex=1)
+```
+
+* * *
+
+# Clean Data
+```{r clean-data}
+# Remove unnecessary rows and columns
+df <- data[-c(1:3), -c(1,5:7,9:13,15:22,24:31)] 
+
+# Rename columns
+names(df)[1] <- "county_fips"
+names(df)[2] <- "postal_code"   
+names(df)[3] <- "names"
+names(df)[4] <- "All"
+names(df)[5] <- "Under18"
+names(df)[6] <- "med.inc"
+
+# Convert from character class to factor
+sapply(df, class)
+df$postal_code <- as.factor(df$postal_code)
+df$names <- as.factor(df$names)
+
+# Convert from character class to numeric
+df$county_fips <- as.numeric(df$county_fips)
+df$All <- as.numeric(df$All)
+df$Under18 <- as.numeric(df$Under18)
+df$med.inc <- as.numeric(df$med.inc)
+
+# Merge state names
+df2 <- merge(df, states, by = "postal_code")
+
+# Remove US
+df2 <- subset(df2, county_fips!=0)
+
+# Convert factor levels to lowercase
+levels(df2$names) <- tolower(levels(df2$names))
+levels(df2$state) <- tolower(levels(df2$state))
+
+# Remove "city and borough, county, borough, census area, parish, 's county" from names
+df2$namesclean <- df2$names
+df2$namesclean <- gsub("city and borough", "", df2$namesclean)
+df2$namesclean <- gsub(" county", "", df2$namesclean)
+df2$namesclean <- gsub(" borough", "", df2$namesclean)
+df2$namesclean <- gsub(" census area", "", df2$namesclean)
+df2$namesclean <- gsub(" parish", "", df2$namesclean)
+df2$namesclean <- gsub("'s", "s", df2$namesclean)
+
+# Combine state and namesclean
+df2$name <- paste(df2$state, df2$namesclean, sep=",")
+
+# Rename DC
+levels(df2$state)[levels(df2$state)=="dist. of columbia"] <- "district of columbia, washington"
+
+# Remove AK, DC, HI
+df3 <- subset(df2, postal_code != "AK" & postal_code != "DC" & postal_code != "HI")
+
+# Poverty data
+poverty2010 <-  subset(df3, select = c(name, All))
+names(poverty2010)[2] <- "POV10"
+
+# Remove missing values
+poverty2010 <- na.omit(poverty2010)
+
+# Save file
+save(poverty2010, file="POV10.Rda")
+
+```
+
+* * *
+
+# Print Map
+```{r print-map}
+# Load libraries
+library(maps)
+library(mapproj)
+
+# Print map
+source("~/Desktop/Rprogramming/ShinyApps/census-app/helpers.R")
+percent_map(poverty2010$POV10, "blue", "% All ages")
+```
+

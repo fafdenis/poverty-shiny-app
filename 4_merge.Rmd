@@ -1,0 +1,40 @@
+---
+title: "Merge Files"
+author: "Stephanie Denis"
+date: "6/22/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, comment="")
+```
+
+# Merge Data
+```{r merge-data}
+# Load data frames
+load("~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/POV05.Rda")
+load("~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/POV10.Rda")
+load("~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/POV15.Rda")
+
+# Merge all data frames
+library(plyr)
+poverty <- join_all(list(poverty2005,poverty2010,poverty2015), by='name', type='left')
+poverty <- na.omit(poverty)
+
+# Save as .RDS file
+save(poverty, file="~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/poverty.rds")
+save(poverty, file="~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/poverty.Rda")
+```
+
+# Print Map
+```{r print-map}
+# Load libraries
+library(maps)
+library(mapproj)
+
+# Print map
+source("~/Desktop/Rprogramming/9_Developing_Data_Products/poverty/counties/helpers.R")
+percent_map(poverty$POV15, "darkgreen", "2015")
+percent_map(poverty$POV10, "blue", "2010")
+percent_map(poverty$POV05, "darkorange", "2005")
+```
