@@ -2,8 +2,8 @@
 
 A shiny app showing poverty rates at the county-level in the continental U.S. for the years 2005, 2010 and 2015.
 
-View app here https://fafdenis.shinyapps.io/povertyvis/
-View presentation here http://rpubs.com/fafdenis/poverty-shiny-app
+- View app here https://fafdenis.shinyapps.io/povertyvis/.
+- View presentation here http://rpubs.com/fafdenis/poverty-shiny-app.
 
 ### Contents
 - `README.md`
