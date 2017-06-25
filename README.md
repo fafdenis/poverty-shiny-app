@@ -2,6 +2,8 @@
 
 A shiny app showing poverty rates at the county-level in the continental U.S. for the years 2005, 2010 and 2015.
 
+View app here https://fafdenis.shinyapps.io/povertyvis/
+
 ### Contents
 - `README.md`
 - `ui.R` - user interface R script that controls the layout and look of my app.
